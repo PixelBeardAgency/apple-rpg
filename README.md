@@ -17,18 +17,18 @@
 
 ## 📖 Overview
 
-A full-stack web application that transforms task management into an RPG-style adventure. Complete tasks, earn XP, level up, unlock achievements, and organize your life with custom labels!
+A full-stack web application that transforms task management into an RPG-style adventure. Complete tasks, earn XP, level up, unlock achievements, and organise your life with custom labels!
 
 ## 🎮 Features
 
 - **Gamified Task Management**: Complete tasks to earn XP and level up
 - **RPG Progression System**: 20 levels with exponential XP requirements
 - **Achievement System**: 10 unlockable achievements with bonus XP rewards
-- **Custom Labels**: Unlimited custom labels for task organization
+- **Custom Labels**: Unlimited custom labels for task organisation
 - **Task Filtering**: Filter tasks by multiple labels
 - **Progress Tracking**: View XP progress in header and profile page
 - **Task History**: Complete history of finished tasks with XP earned
-- **Fantasy RPG Aesthetic**: Deep blues/greens palette with pixel-art icons
+- **Fantasy RPG Aesthetic**: Deep blues/greens colour palette with pixel-art icons
 - **Dark & Light Modes**: Toggle between themes
 - **Interactive Tutorial**: First-login walkthrough for new users
 - **Responsive Design**: Works on desktop and mobile
@@ -217,7 +217,7 @@ This is a personal project for evaluation purposes. Not accepting external contr
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and code standards.
 
-## 📄 License
+## 📄 Licence
 
 ISC
 
