@@ -142,9 +142,20 @@ async function seedAchievements() {
     }
   ];
 
+  // Check if achievements already exist
+  const { data: existing } = await supabase
+    .from('achievements')
+    .select('name');
+
+  if (existing && existing.length >= 10) {
+    console.log('⚠️  Achievements already exist, skipping...');
+    return;
+  }
+
+  // Insert achievements if they don't exist
   const { data, error } = await supabase
     .from('achievements')
-    .upsert(achievements, { onConflict: 'name' });
+    .insert(achievements);
 
   if (error) {
     console.error('❌ Error seeding achievements:', error);
@@ -181,9 +192,10 @@ async function seedDefaultLabels() {
     return;
   }
 
+  // Insert labels if they don't exist
   const { data, error } = await supabase
     .from('labels')
-    .upsert(defaultLabels, { onConflict: 'name' });
+    .insert(defaultLabels);
 
   if (error) {
     console.error('❌ Error seeding default labels:', error);
