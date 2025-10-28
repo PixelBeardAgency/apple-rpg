@@ -150,7 +150,7 @@ const Profile = () => {
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full transition-all duration-500 ease-out flex items-center justify-center text-white text-xs font-bold"
+                className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 h-full transition-all duration-500 ease-out flex items-center justify-center text-white text-xs font-bold"
                 style={{ width: `${profile?.progress?.progressPercentage || 0}%` }}
               >
                 {profile?.progress?.progressPercentage > 10 && `${profile?.progress?.progressPercentage}%`}

@@ -24,7 +24,13 @@ const Dashboard = () => {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    await createTask.mutateAsync(newTask);
+    // Convert empty strings to null for optional fields
+    const taskData = {
+      ...newTask,
+      description: newTask.description || null,
+      due_date: newTask.due_date || null
+    };
+    await createTask.mutateAsync(taskData);
     setNewTask({ title: '', description: '', priority: 'MEDIUM', due_date: '' });
     setShowCreateForm(false);
   };

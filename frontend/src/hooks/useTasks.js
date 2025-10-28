@@ -11,6 +11,9 @@ export const useTasks = (labelFilter = null) => {
   return useQuery({
     queryKey: ['tasks', labelFilter],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       let query = supabase
         .from('tasks')
         .select(`
@@ -19,6 +22,7 @@ export const useTasks = (labelFilter = null) => {
             label:labels (*)
           )
         `)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       const { data, error } = await query;
@@ -41,10 +45,15 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async ({ title, description, priority, due_date, label_ids }) => {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Create task
       const { data: task, error: taskError } = await supabase
         .from('tasks')
         .insert({
+          user_id: user.id,
           title,
           description,
           priority,

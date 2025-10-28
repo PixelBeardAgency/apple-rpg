@@ -68,13 +68,13 @@ const Header = () => {
                 {profile.progress.isMaxLevel ? (
                   'Max Level!'
                 ) : (
-                  `${profile.progress.xpProgress} / ${profile.progress.xpNeeded} XP`
+                  `${profile.progress.xpProgress} / ${profile.progress.xpNeeded} XP (${profile.progress.totalXP} lifetime XP)`
                 )}
               </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-purple-600 h-full transition-all duration-500 ease-out"
+                className="bg-gradient-to-r from-green-500 to-emerald-600 h-full transition-all duration-500 ease-out"
                 style={{ width: `${profile.progress.progressPercentage}%` }}
               />
             </div>
