@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Achievements from './pages/Achievements';
 import Layout from './components/layout/Layout';
 
 // Protected Route Component
@@ -84,6 +85,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Profile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/achievements"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Achievements />
               </Layout>
             </ProtectedRoute>
           }

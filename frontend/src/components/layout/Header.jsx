@@ -31,6 +31,12 @@ const Header = () => {
               Dashboard
             </Link>
             <Link
+              to="/achievements"
+              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition"
+            >
+              Achievements
+            </Link>
+            <Link
               to="/profile"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition"
             >

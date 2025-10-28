@@ -4,17 +4,21 @@
 import { useState } from 'react';
 import { useTasks, useCreateTask, useCompleteTask, useDeleteTask } from '../hooks/useTasks';
 import { useProfile } from '../hooks/useProfile';
-import { Plus, Check, Trash2, Calendar } from 'lucide-react';
+import { useLabels } from '../hooks/useLabels';
+import { Plus, Check, Trash2, Calendar, X, Tag } from 'lucide-react';
 import { getPriorityColor, getXPForPriority, formatDate } from '../lib/utils';
 
 const Dashboard = () => {
   const { data: tasks, isLoading: tasksLoading } = useTasks();
   const { data: profile } = useProfile();
+  const { data: labels } = useLabels();
   const createTask = useCreateTask();
   const completeTask = useCompleteTask();
   const deleteTask = useDeleteTask();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedLabels, setSelectedLabels] = useState([]);
+  const [filterLabels, setFilterLabels] = useState([]);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -28,10 +32,12 @@ const Dashboard = () => {
     const taskData = {
       ...newTask,
       description: newTask.description || null,
-      due_date: newTask.due_date || null
+      due_date: newTask.due_date || null,
+      label_ids: selectedLabels
     };
     await createTask.mutateAsync(taskData);
     setNewTask({ title: '', description: '', priority: 'MEDIUM', due_date: '' });
+    setSelectedLabels([]);
     setShowCreateForm(false);
   };
 
@@ -52,6 +58,12 @@ const Dashboard = () => {
     }
     const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+
+  // Filter tasks by selected labels
+  const filteredTasks = sortedTasks?.filter(task => {
+    if (filterLabels.length === 0) return true;
+    return task.labels?.some(label => filterLabels.includes(label.id));
   });
 
   return (
@@ -85,7 +97,7 @@ const Dashboard = () => {
       </div>
 
       {/* Create Task Button */}
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="flex items-center space-x-2 bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md transition"
@@ -93,6 +105,42 @@ const Dashboard = () => {
           <Plus className="w-5 h-5" />
           <span>Create Task</span>
         </button>
+
+        {/* Label Filter */}
+        {labels && labels.length > 0 && (
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Filter by label:</span>
+            <div className="flex flex-wrap gap-2">
+              {labels.map((label) => (
+                <button
+                  key={label.id}
+                  onClick={() => {
+                    setFilterLabels(prev =>
+                      prev.includes(label.id)
+                        ? prev.filter(id => id !== label.id)
+                        : [...prev, label.id]
+                    );
+                  }}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition ${
+                    filterLabels.includes(label.id)
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {label.name}
+                </button>
+              ))}
+              {filterLabels.length > 0 && (
+                <button
+                  onClick={() => setFilterLabels([])}
+                  className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 transition"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Create Task Form */}
@@ -156,6 +204,46 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Label Selection */}
+            {labels && labels.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Labels (optional)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {labels.map((label) => (
+                    <button
+                      key={label.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLabels(prev =>
+                          prev.includes(label.id)
+                            ? prev.filter(id => id !== label.id)
+                            : [...prev, label.id]
+                        );
+                      }}
+                      className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                        selectedLabels.includes(label.id)
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      <Tag className="w-3.5 h-3.5" />
+                      <span>{label.name}</span>
+                      {selectedLabels.includes(label.id) && (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {selectedLabels.length > 0 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                    {selectedLabels.length} label{selectedLabels.length > 1 ? 's' : ''} selected
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex space-x-3">
               <button
                 type="submit"
@@ -182,13 +270,15 @@ const Dashboard = () => {
         
         {tasksLoading ? (
           <div className="text-center py-8 text-gray-600 dark:text-gray-400">Loading tasks...</div>
-        ) : sortedTasks?.length === 0 ? (
+        ) : filteredTasks?.length === 0 ? (
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-8 text-center border border-gray-200 dark:border-gray-800">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">No tasks yet. Create one to get started!</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {filterLabels.length > 0 ? 'No tasks match the selected labels.' : 'No tasks yet. Create one to get started!'}
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {sortedTasks?.map((task) => (
+            {filteredTasks?.map((task) => (
               <div
                 key={task.id}
                 className={`bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-800 transition ${
@@ -210,6 +300,20 @@ const Dashboard = () => {
                     
                     {task.description && (
                       <p className="text-gray-600 dark:text-gray-400 mb-2">{task.description}</p>
+                    )}
+                    
+                    {task.labels && task.labels.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {task.labels.map((label) => (
+                          <span
+                            key={label.id}
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                          >
+                            <Tag className="w-3 h-3" />
+                            <span>{label.name}</span>
+                          </span>
+                        ))}
+                      </div>
                     )}
                     
                     {task.due_date && (
