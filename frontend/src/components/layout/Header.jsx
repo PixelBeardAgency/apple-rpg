@@ -1,11 +1,13 @@
 // Header Component with Progress Bar
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useProfile } from '../../hooks/useProfile';
-import { Sword, User, LogOut } from 'lucide-react';
+import { Sword, User, LogOut, Moon, Sun } from 'lucide-react';
 
 const Header = () => {
   const { signOut } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const { data: profile } = useProfile();
 
   const handleLogout = async () => {
@@ -37,6 +39,12 @@ const Header = () => {
               Achievements
             </Link>
             <Link
+              to="/history"
+              className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition"
+            >
+              History
+            </Link>
+            <Link
               to="/profile"
               className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition"
             >
@@ -46,6 +54,19 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
+              )}
+            </button>
+
             <Link
               to="/profile"
               className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary transition"

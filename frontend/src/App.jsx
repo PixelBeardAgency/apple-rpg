@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Achievements from './pages/Achievements';
+import History from './pages/History';
 import Layout from './components/layout/Layout';
 
 // Protected Route Component
@@ -95,6 +96,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Achievements />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <History />
               </Layout>
             </ProtectedRoute>
           }

@@ -1,10 +1,13 @@
 // Dashboard Page
 // Main task list view with create task functionality
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTasks, useCreateTask, useCompleteTask, useDeleteTask } from '../hooks/useTasks';
 import { useProfile } from '../hooks/useProfile';
 import { useLabels } from '../hooks/useLabels';
+import { useAchievements } from '../hooks/useAchievements';
+import { useToast } from '../contexts/ToastContext';
+import Tooltip from '../components/ui/Tooltip';
 import { Plus, Check, Trash2, Calendar, X, Tag } from 'lucide-react';
 import { getPriorityColor, getXPForPriority, formatDate } from '../lib/utils';
 
@@ -12,6 +15,8 @@ const Dashboard = () => {
   const { data: tasks, isLoading: tasksLoading } = useTasks();
   const { data: profile } = useProfile();
   const { data: labels } = useLabels();
+  const { data: achievements, refetch: refetchAchievements } = useAchievements();
+  const { showAchievementToast } = useToast();
   const createTask = useCreateTask();
   const completeTask = useCompleteTask();
   const deleteTask = useDeleteTask();
@@ -19,12 +24,32 @@ const Dashboard = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedLabels, setSelectedLabels] = useState([]);
   const [filterLabels, setFilterLabels] = useState([]);
+  const [previousAchievements, setPreviousAchievements] = useState(null);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
     priority: 'MEDIUM',
     due_date: ''
   });
+
+  // Track achievement changes and show toasts
+  useEffect(() => {
+    if (achievements && previousAchievements) {
+      const newlyEarned = achievements.filter(
+        (achievement) =>
+          achievement.earned &&
+          !previousAchievements.find((prev) => prev.id === achievement.id && prev.earned)
+      );
+
+      newlyEarned.forEach((achievement) => {
+        showAchievementToast(achievement.name, achievement.bonus_xp);
+      });
+    }
+
+    if (achievements) {
+      setPreviousAchievements(achievements);
+    }
+  }, [achievements, previousAchievements, showAchievementToast]);
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
@@ -43,6 +68,8 @@ const Dashboard = () => {
 
   const handleCompleteTask = async (taskId) => {
     await completeTask.mutateAsync(taskId);
+    // Refetch achievements to check for newly unlocked ones
+    setTimeout(() => refetchAchievements(), 500);
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -178,7 +205,10 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Priority *
+                  <span className="inline-flex items-center space-x-2">
+                    <span>Priority *</span>
+                    <Tooltip content="Higher priority tasks earn more XP!" />
+                  </span>
                 </label>
                 <select
                   value={newTask.priority}
@@ -193,7 +223,10 @@ const Dashboard = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Due Date
+                  <span className="inline-flex items-center space-x-2">
+                    <span>Due Date</span>
+                    <Tooltip content="Set a deadline to stay organised!" />
+                  </span>
                 </label>
                 <input
                   type="date"
@@ -208,7 +241,10 @@ const Dashboard = () => {
             {labels && labels.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Labels (optional)
+                  <span className="inline-flex items-center space-x-2">
+                    <span>Labels (optional)</span>
+                    <Tooltip content="Organise tasks with custom labels!" />
+                  </span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {labels.map((label) => (
