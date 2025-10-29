@@ -112,12 +112,27 @@ async function checkAndAwardAchievements(userId, supabase, actionType) {
 }
 
 export default async function handler(req, res) {
+  // Log request for debugging
+  console.log('=== TASKS ENDPOINT CALLED ===');
+  console.log('Method:', req.method);
+  console.log('Headers:', JSON.stringify(req.headers));
+  console.log('Has Authorization:', !!req.headers.authorization);
+  
   // Authenticate
   const authResult = await authenticate(req);
   if (authResult.error) {
-    return res.status(authResult.status).json({ error: authResult.error });
+    console.error('Auth failed:', authResult.error);
+    return res.status(authResult.status).json({ 
+      error: authResult.error,
+      debug: {
+        hasAuthHeader: !!req.headers.authorization,
+        hasSupabaseUrl: !!process.env.SUPABASE_URL,
+        hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      }
+    });
   }
 
+  console.log('Auth successful, userId:', authResult.userId);
   const { userId, supabase } = authResult;
 
   // GET - Fetch all tasks
