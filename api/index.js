@@ -1,6 +1,15 @@
 // Vercel Serverless Function Handler
 // This wraps the Express app for Vercel's serverless environment
 
+// Debug: Log environment at startup
+console.log('=== SERVERLESS FUNCTION STARTING ===');
+console.log('Environment variables check:');
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'EXISTS' : 'MISSING');
+console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING');
+console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'EXISTS' : 'MISSING');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('All SUPABASE_* vars:', Object.keys(process.env).filter(k => k.startsWith('SUPABASE')));
+
 // Load environment variables first
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' }); // Try to load from parent if exists
