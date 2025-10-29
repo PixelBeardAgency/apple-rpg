@@ -143,9 +143,11 @@ export const useCompleteTask = () => {
       const result = await response.json();
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      // FORCE immediate refetch of profile to show XP/level changes
+      await queryClient.refetchQueries({ queryKey: ['profile'] });
+      
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['achievements'] });
       
       // Return achievement data for toast notifications

@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Achievements from './pages/Achievements';
@@ -68,6 +70,8 @@ function App() {
             </PublicRoute>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected Routes */}
         <Route
