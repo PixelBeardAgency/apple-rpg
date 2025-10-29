@@ -52,7 +52,24 @@ export const useProfile = () => {
       const xpForNextLevel = nextLevel?.xp_required || profile.total_xp;
       const xpProgress = profile.total_xp - xpForCurrentLevel;
       const xpNeeded = xpForNextLevel - xpForCurrentLevel;
-      const progressPercentage = isMaxLevel ? 100 : Math.floor((xpProgress / xpNeeded) * 100);
+      
+      // Ensure progressPercentage is always a valid number between 0-100
+      let progressPercentage = 0;
+      if (isMaxLevel) {
+        progressPercentage = 100;
+      } else if (xpNeeded > 0) {
+        progressPercentage = Math.max(0, Math.min(100, Math.floor((xpProgress / xpNeeded) * 100)));
+      }
+      
+      console.log('Progress calculation:', {
+        currentLevel: profile.current_level,
+        totalXP: profile.total_xp,
+        xpForCurrentLevel,
+        xpForNextLevel,
+        xpProgress,
+        xpNeeded,
+        progressPercentage
+      });
 
       return {
         ...profile,
