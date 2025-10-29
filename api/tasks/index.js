@@ -22,7 +22,7 @@ async function authenticate(req) {
   const token = authHeader.substring(7);
   
   console.log('Auth check - token length:', token.length);
-  console.log('Auth check - has SUPABASE_URL:', !!process.env.SUPABASE_URL);
+  console.log('Auth check - SUPABASE_URL:', process.env.SUPABASE_URL);
   console.log('Auth check - has SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
   
   const supabase = createClient(
@@ -33,13 +33,13 @@ async function authenticate(req) {
   const { data: { user }, error } = await supabase.auth.getUser(token);
   
   if (error) {
-    console.error('Auth error:', error);
+    console.error('Auth error details:', JSON.stringify(error));
     return { error: `Invalid token: ${error.message}`, status: 401 };
   }
   
   if (!user) {
     console.error('No user returned from token verification');
-    return { error: 'Invalid token', status: 401 };
+    return { error: 'Invalid token: No user found', status: 401 };
   }
 
   console.log('Auth success - user ID:', user.id);
