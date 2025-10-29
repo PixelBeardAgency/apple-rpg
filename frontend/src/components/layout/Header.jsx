@@ -97,7 +97,7 @@ const Header = () => {
 
         {/* Progress Bar (CRITICAL: Must be in header) */}
         {profile && (
-          <div className="pb-4">
+          <div className="pb-4" key={`progress-${profile.progress.progressPercentage}`}>
             <div className="flex items-center justify-between text-sm mb-1">
               <span className="text-gray-600 dark:text-gray-400">
                 Level {profile.progress.currentLevel}
@@ -112,6 +112,7 @@ const Header = () => {
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
               <div
+                key={profile.progress.progressPercentage}
                 className="bg-gradient-to-r from-green-500 to-emerald-600 h-full transition-all duration-500 ease-out"
                 style={{ width: `${profile.progress.progressPercentage}%` }}
               />
