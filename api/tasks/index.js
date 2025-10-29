@@ -12,11 +12,19 @@ const XP_VALUES = {
 // Auth helper
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
+  
+  console.log('Auth check - has header:', !!authHeader);
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return { error: 'No token provided', status: 401 };
   }
 
   const token = authHeader.substring(7);
+  
+  console.log('Auth check - token length:', token.length);
+  console.log('Auth check - has SUPABASE_URL:', !!process.env.SUPABASE_URL);
+  console.log('Auth check - has SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
   const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -24,10 +32,17 @@ async function authenticate(req) {
 
   const { data: { user }, error } = await supabase.auth.getUser(token);
   
-  if (error || !user) {
+  if (error) {
+    console.error('Auth error:', error);
+    return { error: `Invalid token: ${error.message}`, status: 401 };
+  }
+  
+  if (!user) {
+    console.error('No user returned from token verification');
     return { error: 'Invalid token', status: 401 };
   }
 
+  console.log('Auth success - user ID:', user.id);
   return { userId: user.id, supabase };
 }
 
