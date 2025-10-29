@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Sword, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Sword } from 'lucide-react';
 
 // Use relative URLs on production (Vercel), localhost for development
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -13,9 +13,6 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [usernameChecking, setUsernameChecking] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState(null);
-  const [usernameError, setUsernameError] = useState('');
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -23,42 +20,6 @@ const Register = () => {
   useEffect(() => {
     localStorage.setItem('hasVisited', 'true');
   }, []);
-
-  // Debounced username check
-  useEffect(() => {
-    const checkUsername = async () => {
-      if (!username || username.length < 3) {
-        setUsernameAvailable(null);
-        setUsernameError('');
-        return;
-      }
-
-      setUsernameChecking(true);
-      setUsernameError('');
-
-      try {
-        const response = await fetch(`${API_URL}/api/auth/check-username/${encodeURIComponent(username)}`);
-        const data = await response.json();
-
-        if (data.available) {
-          setUsernameAvailable(true);
-        } else {
-          setUsernameAvailable(false);
-          setUsernameError('Username is already taken');
-        }
-      } catch (error) {
-        console.error('Username check error:', error);
-        // Don't show error to user, just reset state
-        setUsernameAvailable(null);
-      } finally {
-        setUsernameChecking(false);
-      }
-    };
-
-    // Debounce the check by 500ms
-    const timer = setTimeout(checkUsername, 500);
-    return () => clearTimeout(timer);
-  }, [username]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,41 +136,16 @@ const Register = () => {
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Username
               </label>
-              <div className="relative">
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  minLength={3}
-                  className={`w-full px-4 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white ${
-                    usernameError 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : usernameAvailable 
-                      ? 'border-green-500 dark:border-green-500' 
-                      : 'border-gray-300 dark:border-gray-700'
-                  }`}
-                  placeholder="hero123"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameChecking && (
-                    <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-                  )}
-                  {!usernameChecking && usernameAvailable === true && (
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  )}
-                  {!usernameChecking && usernameAvailable === false && (
-                    <XCircle className="w-5 h-5 text-red-500" />
-                  )}
-                </div>
-              </div>
-              {usernameError && (
-                <p className="mt-1 text-xs text-red-500">{usernameError}</p>
-              )}
-              {usernameAvailable && !usernameError && (
-                <p className="mt-1 text-xs text-green-600 dark:text-green-400">Username is available!</p>
-              )}
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                minLength={3}
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white border-gray-300 dark:border-gray-700"
+                placeholder="hero123"
+              />
               {username.length > 0 && username.length < 3 && (
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Username must be at least 3 characters</p>
               )}
