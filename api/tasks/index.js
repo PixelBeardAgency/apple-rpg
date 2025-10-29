@@ -23,14 +23,23 @@ async function authenticate(req) {
   
   console.log('Auth check - token length:', token.length);
   console.log('Auth check - SUPABASE_URL:', process.env.SUPABASE_URL);
+  console.log('Auth check - has ANON_KEY:', !!process.env.SUPABASE_ANON_KEY);
   console.log('Auth check - has SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
   
-  const supabase = createClient(
+  // Create client with ANON_KEY and user's token to verify the user
+  const userClient = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_ANON_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: authHeader
+        }
+      }
+    }
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const { data: { user }, error } = await userClient.auth.getUser();
   
   if (error) {
     console.error('Auth error details:', JSON.stringify(error));
@@ -43,6 +52,13 @@ async function authenticate(req) {
   }
 
   console.log('Auth success - user ID:', user.id);
+  
+  // Create service client for database operations (bypasses RLS)
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  
   return { userId: user.id, supabase };
 }
 

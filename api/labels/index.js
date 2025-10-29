@@ -10,16 +10,31 @@ async function authenticate(req) {
   }
 
   const token = authHeader.substring(7);
-  const supabase = createClient(
+  
+  // Create client with ANON_KEY and user's token to verify the user
+  const userClient = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_ANON_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: authHeader
+        }
+      }
+    }
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const { data: { user }, error } = await userClient.auth.getUser();
   
   if (error || !user) {
     return { error: 'Invalid token', status: 401 };
   }
+  
+  // Create service client for database operations
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
 
   return { userId: user.id, supabase };
 }
