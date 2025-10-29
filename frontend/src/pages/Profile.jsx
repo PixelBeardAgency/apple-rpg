@@ -4,8 +4,9 @@
 import { useState } from 'react';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { supabase } from '../lib/supabase';
-import { User, Edit2, Trophy, Zap, Lock } from 'lucide-react';
+import { User, Edit2, Trophy, Zap, Lock, Sparkles } from 'lucide-react';
 import ProfilePictureUpload from '../components/profile/ProfilePictureUpload';
+import { generateRPGTitle, formatRPGName } from '../utils/rpgTitles';
 
 const Profile = () => {
   const { data: profile, isLoading, refetch } = useProfile();
@@ -14,8 +15,10 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     username: '',
-    bio: ''
+    bio: '',
+    rpg_title: ''
   });
+  const [previewRPGTitle, setPreviewRPGTitle] = useState('');
 
   // Password change state
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -35,9 +38,17 @@ const Profile = () => {
   const handleEdit = () => {
     setEditData({
       username: profile?.username || '',
-      bio: profile?.bio || ''
+      bio: profile?.bio || '',
+      rpg_title: profile?.rpg_title || ''
     });
+    setPreviewRPGTitle(profile?.rpg_title || '');
     setIsEditing(true);
+  };
+
+  const handleRandomizeTitle = () => {
+    const newTitle = generateRPGTitle();
+    setPreviewRPGTitle(newTitle);
+    setEditData({ ...editData, rpg_title: newTitle });
   };
 
   const handleSave = async (e) => {
@@ -159,16 +170,19 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Profile Picture Upload Section */}
-        <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-          <ProfilePictureUpload
-            currentPictureUrl={profile?.profile_picture_url}
-            onUploadComplete={handleProfilePictureUpload}
-          />
-        </div>
-
         {isEditing ? (
           <form onSubmit={handleSave} className="space-y-4">
+            {/* Profile Picture Upload - only in edit mode */}
+            <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Profile Picture
+              </label>
+              <ProfilePictureUpload
+                currentPictureUrl={profile?.profile_picture_url}
+                onUploadComplete={handleProfilePictureUpload}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Username
@@ -192,6 +206,34 @@ const Profile = () => {
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
                 placeholder="Tell us about yourself..."
               />
+            </div>
+
+            {/* RPG Title Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                RPG Title
+              </label>
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Your heroic title:</p>
+                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">
+                      {previewRPGTitle ? formatRPGName(editData.username || profile?.username, previewRPGTitle) : 'No title yet'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRandomizeTitle}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-md transition"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Randomize</span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Not feeling this title? Click "Randomize" to get a new mythical title!
+                </p>
+              </div>
             </div>
 
             <div className="flex space-x-3">

@@ -133,12 +133,13 @@ export default async function handler(req, res) {
   // PATCH - Update profile
   else if (req.method === 'PATCH') {
     try {
-      const { username, bio, profile_picture_url } = req.body;
+      const { username, bio, profile_picture_url, rpg_title } = req.body;
 
       const updates = {};
       if (username !== undefined) updates.username = username;
       if (bio !== undefined) updates.bio = bio;
       if (profile_picture_url !== undefined) updates.profile_picture_url = profile_picture_url;
+      if (rpg_title !== undefined) updates.rpg_title = rpg_title;
 
       const { data, error } = await supabase
         .from('users')

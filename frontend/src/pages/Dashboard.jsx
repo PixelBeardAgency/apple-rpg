@@ -15,6 +15,7 @@ import LabelManager from '../components/labels/LabelManager';
 import { Calendar, X, HelpCircle } from 'lucide-react';
 import { HighPriorityIcon, MediumPriorityIcon, LowPriorityIcon, PlusIcon, CheckIcon, TrashPixelIcon, EditPixelIcon, TagPixelIcon } from '../components/icons/PixelIcons';
 import { getPriorityColor, getXPForPriority, formatDate } from '../lib/utils';
+import { formatRPGName } from '../utils/rpgTitles';
 
 const Dashboard = () => {
   const { data: tasks, isLoading: tasksLoading } = useTasks();
@@ -194,7 +195,7 @@ const Dashboard = () => {
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Welcome, {profile?.username || 'Hero'}!
+          Welcome, {profile ? formatRPGName(profile.username, profile.rpg_title) : 'Hero'}!
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Complete tasks to earn XP and level up

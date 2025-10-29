@@ -98,7 +98,7 @@ export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ username, bio, profile_picture_url }) => {
+    mutationFn: async ({ username, bio, profile_picture_url, rpg_title }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -106,6 +106,7 @@ export const useUpdateProfile = () => {
       if (username !== undefined) updates.username = username;
       if (bio !== undefined) updates.bio = bio;
       if (profile_picture_url !== undefined) updates.profile_picture_url = profile_picture_url;
+      if (rpg_title !== undefined) updates.rpg_title = rpg_title;
 
       const { data, error } = await supabase
         .from('users')
