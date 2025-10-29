@@ -50,12 +50,15 @@ export default async function handler(req, res) {
     }
 
     // Register user with Supabase Auth
+    const rpgTitle = generateRPGTitle();
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username
+          username,
+          rpg_title: rpgTitle
         }
       }
     });
@@ -69,7 +72,8 @@ export default async function handler(req, res) {
       user: {
         id: data.user.id,
         email: data.user.email,
-        username
+        username,
+        rpg_title: rpgTitle
       },
       session: data.session
     });
