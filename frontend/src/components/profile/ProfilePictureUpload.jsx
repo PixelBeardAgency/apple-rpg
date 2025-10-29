@@ -56,7 +56,7 @@ const ProfilePictureUpload = ({ currentPictureUrl, onUploadComplete }) => {
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
+        .from('profile-picture')
         .upload(filePath, blob, {
           cacheControl: '3600',
           upsert: false
@@ -66,7 +66,7 @@ const ProfilePictureUpload = ({ currentPictureUrl, onUploadComplete }) => {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('profile-pictures')
+        .from('profile-picture')
         .getPublicUrl(filePath);
 
       // Update user profile
