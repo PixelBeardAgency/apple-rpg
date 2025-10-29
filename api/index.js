@@ -1,81 +1,88 @@
 // Vercel Serverless Function Handler
-// This wraps the Express app for Vercel's serverless environment
+// Dynamic import approach for ESM compatibility
 
-// Debug: Log environment at startup
-console.log('=== SERVERLESS FUNCTION STARTING ===');
-console.log('Environment variables check:');
-console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'EXISTS' : 'MISSING');
-console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING');
-console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'EXISTS' : 'MISSING');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('All SUPABASE_* vars:', Object.keys(process.env).filter(k => k.startsWith('SUPABASE')));
+export default async function handler(req, res) {
+  try {
+    // Debug logging
+    console.log('=== SERVERLESS FUNCTION STARTING ===');
+    console.log('Environment variables check:');
+    console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'EXISTS' : 'MISSING');
+    console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING');
+    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'EXISTS' : 'MISSING');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('Request:', req.method, req.url);
 
-// Load environment variables first
-import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' }); // Try to load from parent if exists
+    // Dynamically import express and create app
+    const express = (await import('express')).default;
+    const cors = (await import('cors')).default;
+    
+    // Import routes dynamically
+    const { default: authRoutes } = await import('../backend/src/routes/auth.js');
+    const { default: taskRoutes } = await import('../backend/src/routes/tasks.js');
+    const { default: profileRoutes } = await import('../backend/src/routes/profile.js');
+    const { default: labelRoutes } = await import('../backend/src/routes/labels.js');
+    const { default: achievementRoutes } = await import('../backend/src/routes/achievements.js');
+    const { default: levelRoutes } = await import('../backend/src/routes/levels.js');
 
-// Import the Express app
-import express from 'express';
-import cors from 'cors';
+    const app = express();
 
-// Import routes
-import authRoutes from '../backend/src/routes/auth.js';
-import taskRoutes from '../backend/src/routes/tasks.js';
-import profileRoutes from '../backend/src/routes/profile.js';
-import labelRoutes from '../backend/src/routes/labels.js';
-import achievementRoutes from '../backend/src/routes/achievements.js';
-import levelRoutes from '../backend/src/routes/levels.js';
+    // Middleware
+    app.use(cors({
+      origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:5173',
+        'https://apple-rpg.vercel.app',
+        /https:\/\/apple-rpg-.*\.vercel\.app$/
+      ],
+      credentials: true,
+      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    }));
+    app.use(express.json());
 
-const app = express();
+    // Request logging
+    app.use((req, res, next) => {
+      console.log(`${req.method} ${req.path}`);
+      next();
+    });
 
-// Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5173',
-    'https://apple-rpg.vercel.app',
-    /https:\/\/apple-rpg-.*\.vercel\.app$/  // Preview deployments
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.use(express.json());
+    // Health check
+    app.get('/api/health', (req, res) => {
+      res.json({ status: 'ok', message: 'RPG Todo API is running' });
+    });
 
-// Request logging for debugging
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path} - Full URL: ${req.url}`);
-  next();
-});
+    // API Routes
+    app.use('/api/auth', authRoutes);
+    app.use('/api/tasks', taskRoutes);
+    app.use('/api/profile', profileRoutes);
+    app.use('/api/labels', labelRoutes);
+    app.use('/api/achievements', achievementRoutes);
+    app.use('/api/levels', levelRoutes);
 
-// Health check - responds to /api/health
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'RPG Todo API is running' });
-});
+    // 404 handler
+    app.use((req, res) => {
+      res.status(404).json({ error: 'Route not found', path: req.path });
+    });
 
-// API Routes - already prefixed with /api/ by Vercel routing
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/labels', labelRoutes);
-app.use('/api/achievements', achievementRoutes);
-app.use('/api/levels', levelRoutes);
+    // Error handler
+    app.use((err, req, res, next) => {
+      console.error('Server error:', err);
+      res.status(500).json({ 
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred'
+      });
+    });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found', path: req.path });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred'
-  });
-});
-
-export default app;
+    // Handle the request
+    return app(req, res);
+  } catch (error) {
+    console.error('Handler error:', error);
+    return res.status(500).json({ 
+      error: 'Function initialization failed',
+      message: error.message 
+    });
+  }
+}
 
 
