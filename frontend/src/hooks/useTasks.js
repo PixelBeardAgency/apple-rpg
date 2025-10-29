@@ -149,7 +149,8 @@ export const useCompleteTask = () => {
     },
     onSuccess: async (data) => {
       // FORCE immediate refetch of profile to show XP/level changes
-      await queryClient.refetchQueries({ queryKey: ['profile'] });
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
+      await queryClient.refetchQueries({ queryKey: ['profile'], type: 'active' });
       
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['achievements'] });
