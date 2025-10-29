@@ -10,12 +10,12 @@ import express from 'express';
 import cors from 'cors';
 
 // Import routes
-import authRoutes from '../src/routes/auth.js';
-import taskRoutes from '../src/routes/tasks.js';
-import profileRoutes from '../src/routes/profile.js';
-import labelRoutes from '../src/routes/labels.js';
-import achievementRoutes from '../src/routes/achievements.js';
-import levelRoutes from '../src/routes/levels.js';
+import authRoutes from '../backend/src/routes/auth.js';
+import taskRoutes from '../backend/src/routes/tasks.js';
+import profileRoutes from '../backend/src/routes/profile.js';
+import labelRoutes from '../backend/src/routes/labels.js';
+import achievementRoutes from '../backend/src/routes/achievements.js';
+import levelRoutes from '../backend/src/routes/levels.js';
 
 const app = express();
 
