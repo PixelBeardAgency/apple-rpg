@@ -4,18 +4,12 @@
   "installCommand": "npm install --prefix frontend && npm install --prefix backend && npm install --prefix api",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
