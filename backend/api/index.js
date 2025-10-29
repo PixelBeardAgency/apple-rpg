@@ -36,19 +36,16 @@ app.use(express.json());
 
 // Request logging for debugging
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  console.log(`${req.method} ${req.path} - Full URL: ${req.url}`);
   next();
 });
 
-// Health check (both /health and /api/health for compatibility)
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'RPG Todo API is running' });
-});
+// Health check - responds to /api/health
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'RPG Todo API is running' });
 });
 
-// API Routes
+// API Routes - already prefixed with /api/ by Vercel routing
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/profile', profileRoutes);

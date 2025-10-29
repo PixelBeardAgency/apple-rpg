@@ -2,13 +2,25 @@
 // Verifies Supabase JWT tokens
 
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
 
-dotenv.config();
+// Debug: Log what env vars we have
+console.log('Auth middleware loading...');
+console.log('SUPABASE_URL exists:', !!process.env.SUPABASE_URL);
+console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+console.log('Available env vars:', Object.keys(process.env).filter(k => k.startsWith('SUPABASE')));
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase credentials!');
+  console.error('URL:', supabaseUrl ? 'SET' : 'MISSING');
+  console.error('KEY:', supabaseKey ? 'SET' : 'MISSING');
+}
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  supabaseUrl,
+  supabaseKey
 );
 
 export const authenticate = async (req, res, next) => {
