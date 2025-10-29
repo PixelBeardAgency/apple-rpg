@@ -115,10 +115,19 @@ const Achievements = () => {
                   )}
                 </div>
 
-                {!achievement.earned && (
+                {!achievement.earned && achievement.progress && (
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div className="text-xs text-gray-500 dark:text-gray-500">
-                      <span className="font-semibold">Requirement:</span> {achievement.description}
+                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-2">
+                      <span className="font-semibold">Progress</span>
+                      <span className="font-mono">
+                        {achievement.progress.current} / {achievement.progress.required}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary to-emerald-600 h-full transition-all duration-300"
+                        style={{ width: `${achievement.progress.percentage}%` }}
+                      />
                     </div>
                   </div>
                 )}

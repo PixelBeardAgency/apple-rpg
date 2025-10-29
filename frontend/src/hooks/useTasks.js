@@ -45,44 +45,32 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async ({ title, description, priority, due_date, label_ids }) => {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      // Create task
-      const { data: task, error: taskError } = await supabase
-        .from('tasks')
-        .insert({
-          user_id: user.id,
-          title,
-          description,
-          priority,
-          due_date
-        })
-        .select()
-        .single();
+      // Call backend API to create task (handles achievement checking)
+      const response = await fetch('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ title, description, priority, due_date, label_ids })
+      });
 
-      if (taskError) throw taskError;
-
-      // Add label associations if provided
-      if (label_ids && label_ids.length > 0) {
-        const taskLabels = label_ids.map(label_id => ({
-          task_id: task.id,
-          label_id
-        }));
-
-        const { error: labelError } = await supabase
-          .from('task_labels')
-          .insert(taskLabels);
-
-        if (labelError) throw labelError;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create task');
       }
 
-      return task;
+      const result = await response.json();
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['achievements'] });
+      return data;
     }
   });
 };
@@ -135,50 +123,33 @@ export const useCompleteTask = () => {
 
   return useMutation({
     mutationFn: async (taskId) => {
-      // Get task to calculate XP
-      const { data: task, error: taskError } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', taskId)
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      if (taskError) throw taskError;
+      // Call backend API to complete task (handles XP + achievements)
+      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
 
-      const XP_VALUES = { HIGH: 100, MEDIUM: 50, LOW: 25 };
-      const xpEarned = XP_VALUES[task.priority];
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to complete task');
+      }
 
-      // Mark complete
-      const { error: updateError } = await supabase
-        .from('tasks')
-        .update({
-          is_completed: true,
-          completed_at: new Date().toISOString(),
-          xp_earned: xpEarned
-        })
-        .eq('id', taskId);
-
-      if (updateError) throw updateError;
-
-      // Update user XP
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: userData } = await supabase
-        .from('users')
-        .select('total_xp, current_level')
-        .eq('id', user.id)
-        .single();
-
-      const newTotalXP = userData.total_xp + xpEarned;
-
-      await supabase
-        .from('users')
-        .update({ total_xp: newTotalXP })
-        .eq('id', user.id);
-
-      return { xpEarned, newTotalXP };
+      const result = await response.json();
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['achievements'] });
+      
+      // Return achievement data for toast notifications
+      return data;
     }
   });
 };

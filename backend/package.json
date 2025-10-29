@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/db/seed.js"
+    "seed": "node src/db/seed.js",
+    "test": "node --test src/tests/api.test.js",
+    "test:security": "node --test src/tests/security.test.js",
+    "health": "node src/tests/health-check.js"
   },
   "dependencies": {
     "express": "^4.18.3",

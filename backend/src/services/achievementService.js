@@ -76,10 +76,16 @@ export async function checkAndAwardAchievements(userId, actionType, actionData =
             achievement_id: achievement.id
           });
 
-        if (!insertError) {
-          // Award bonus XP
-          await awardXP(userId, 0, achievement.bonus_xp);
-          newAchievements.push(achievement);
+        // Ignore duplicate key errors (23505 = unique constraint violation)
+        if (!insertError || insertError.code === '23505') {
+          // Only award bonus XP if this is a new achievement (not a duplicate)
+          if (!insertError) {
+            await awardXP(userId, 0, achievement.bonus_xp);
+            newAchievements.push(achievement);
+          }
+        } else {
+          // Log other errors but don't throw
+          console.error('Error inserting achievement:', insertError);
         }
       }
     }
@@ -134,6 +140,80 @@ async function checkLabelsCreated(userId, requiredCount) {
 }
 
 /**
+ * Get current progress for an achievement
+ */
+async function getAchievementProgress(userId, criteriaType, criteriaValue) {
+  let currentValue = 0;
+
+  switch (criteriaType) {
+    case 'TASKS_CREATED':
+      const { count: tasksCount } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      currentValue = tasksCount || 0;
+      break;
+
+    case 'HIGH_PRIORITY_COMPLETED':
+      const { count: highCount } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('priority', 'HIGH')
+        .eq('is_completed', true);
+      currentValue = highCount || 0;
+      break;
+
+    case 'MEDIUM_PRIORITY_COMPLETED':
+      const { count: medCount } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('priority', 'MEDIUM')
+        .eq('is_completed', true);
+      currentValue = medCount || 0;
+      break;
+
+    case 'LOW_PRIORITY_COMPLETED':
+      const { count: lowCount } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('priority', 'LOW')
+        .eq('is_completed', true);
+      currentValue = lowCount || 0;
+      break;
+
+    case 'LEVEL_REACHED':
+      const { data: userData } = await supabase
+        .from('users')
+        .select('current_level')
+        .eq('id', userId)
+        .single();
+      currentValue = userData?.current_level || 0;
+      break;
+
+    case 'LABELS_CREATED':
+      const { count: labelsCount } = await supabase
+        .from('labels')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_default', false);
+      currentValue = labelsCount || 0;
+      break;
+
+    default:
+      currentValue = 0;
+  }
+
+  return {
+    current: Math.min(currentValue, criteriaValue),
+    required: criteriaValue,
+    percentage: Math.min(100, Math.floor((currentValue / criteriaValue) * 100))
+  };
+}
+
+/**
  * Get all achievements with user's earned status
  */
 export async function getAchievementsWithStatus(userId) {
@@ -159,12 +239,22 @@ export async function getAchievementsWithStatus(userId) {
       earnedAchievements.map(a => [a.achievement_id, a.earned_at])
     );
 
-    // Merge data
-    const achievementsWithStatus = allAchievements.map(achievement => ({
-      ...achievement,
-      earned: earnedMap.has(achievement.id),
-      earned_at: earnedMap.get(achievement.id) || null
-    }));
+    // Merge data with progress
+    const achievementsWithStatus = await Promise.all(
+      allAchievements.map(async (achievement) => {
+        const isEarned = earnedMap.has(achievement.id);
+        const progress = isEarned 
+          ? { current: achievement.criteria_value, required: achievement.criteria_value, percentage: 100 }
+          : await getAchievementProgress(userId, achievement.criteria_type, achievement.criteria_value);
+
+        return {
+          ...achievement,
+          earned: isEarned,
+          earned_at: earnedMap.get(achievement.id) || null,
+          progress
+        };
+      })
+    );
 
     return achievementsWithStatus;
   } catch (error) {

@@ -137,7 +137,10 @@ const History = () => {
                             {task.priority}
                           </span>
                           <span className="text-gray-500 dark:text-gray-500">
-                            Completed {formatDateTime(task.completed_at)}
+                            Completed at {new Date(task.completed_at).toLocaleTimeString('en-GB', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                           </span>
                           {task.labels && task.labels.length > 0 && (
                             <div className="flex gap-1">

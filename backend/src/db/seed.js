@@ -24,13 +24,19 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ========================================
-// 1. SEED LEVELS (20 levels with exponential XP)
-// Formula: XP = 100 * (level ^ 1.5)
+// 1. SEED LEVELS (21 levels: 0-20 with exponential XP)
+// Level 0: 0 XP (starting level)
+// Formula for Level 1+: XP = 100 * (level ^ 1.5)
 // ========================================
 async function seedLevels() {
-  console.log('📊 Seeding 20 levels with exponential XP...');
+  console.log('📊 Seeding 21 levels (0-20) with exponential XP...');
   
   const levels = [];
+  
+  // Level 0: Starting level
+  levels.push({ level_number: 0, xp_required: 0 });
+  
+  // Levels 1-20: Exponential XP formula
   for (let level = 1; level <= 20; level++) {
     const xpRequired = Math.floor(100 * Math.pow(level, 1.5));
     levels.push({ level_number: level, xp_required: xpRequired });
@@ -45,7 +51,8 @@ async function seedLevels() {
     throw error;
   }
 
-  console.log('✅ Seeded 20 levels successfully');
+  console.log('✅ Seeded 21 levels successfully');
+  console.log('   Level 0: 0 XP (starting level)');
   console.log('   Level 1: 100 XP');
   console.log('   Level 5: 1,118 XP');
   console.log('   Level 10: 3,162 XP');

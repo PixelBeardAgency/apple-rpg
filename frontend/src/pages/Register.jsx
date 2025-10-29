@@ -18,8 +18,27 @@ const Register = () => {
     setError('');
     setLoading(true);
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Validate password requirements
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      setError('Password must contain at least one uppercase letter');
+      setLoading(false);
+      return;
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      setError('Password must contain at least one lowercase letter');
+      setLoading(false);
+      return;
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      setError('Password must contain at least one number');
       setLoading(false);
       return;
     }
@@ -27,7 +46,18 @@ const Register = () => {
     const { error } = await signUp(email, password, username);
 
     if (error) {
-      setError(error.message);
+      // Parse Supabase error messages for user-friendly display
+      let errorMessage = error.message;
+      
+      if (errorMessage.includes('User already registered')) {
+        errorMessage = 'A user with this email address already exists. Please login instead.';
+      } else if (errorMessage.includes('Email address')) {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (errorMessage.includes('Password')) {
+        errorMessage = 'Password does not meet requirements. Please try again.';
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     } else {
       navigate('/dashboard');
@@ -99,12 +129,12 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
                 placeholder="••••••••"
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Must be at least 6 characters
+                Must be at least 8 characters, include 1 uppercase letter, 1 lowercase letter, and 1 number
               </p>
             </div>
 

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   bio TEXT,
   profile_picture_url TEXT,
   total_xp INTEGER DEFAULT 0,
-  current_level INTEGER DEFAULT 1,
+  current_level INTEGER DEFAULT 0,
   tutorial_completed BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

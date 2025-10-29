@@ -34,24 +34,31 @@ export const useCreateLabel = () => {
 
   return useMutation({
     mutationFn: async ({ name }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
-        .from('labels')
-        .insert({
-          user_id: user.id,
-          name,
-          is_default: false
-        })
-        .select()
-        .single();
+      // Call backend API to create label (handles achievement checking)
+      const response = await fetch('http://localhost:3000/api/labels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ name })
+      });
 
-      if (error) throw error;
-      return data;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create label');
+      }
+
+      const result = await response.json();
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['labels'] });
+      queryClient.invalidateQueries({ queryKey: ['achievements'] });
+      return data;
     }
   });
 };
