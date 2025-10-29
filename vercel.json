@@ -9,7 +9,7 @@
       }
     },
     {
-      "src": "backend/src/server.js",
+      "src": "backend/api/index.js",
       "use": "@vercel/node"
     }
   ],
@@ -19,17 +19,12 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/backend/src/server.js"
+      "dest": "/backend/api/index.js"
     },
     {
       "src": "/(.*)",
       "dest": "/frontend/dist/$1"
     }
-  ],
-  "functions": {
-    "backend/src/server.js": {
-      "includeFiles": "backend/**"
-    }
-  }
+  ]
 }
 
