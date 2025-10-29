@@ -33,8 +33,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Health check
+// Request logging for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+// Health check (both /health and /api/health for compatibility)
 app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'RPG Todo API is running' });
+});
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'RPG Todo API is running' });
 });
 
