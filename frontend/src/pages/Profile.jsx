@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { supabase } from '../lib/supabase';
 import { User, Edit2, Trophy, Zap, Lock } from 'lucide-react';
+import ProfilePictureUpload from '../components/profile/ProfilePictureUpload';
 
 const Profile = () => {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, refetch } = useProfile();
   const updateProfile = useUpdateProfile();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -25,6 +26,11 @@ const Profile = () => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  const handleProfilePictureUpload = () => {
+    // Refetch profile to update picture everywhere
+    refetch();
+  };
 
   const handleEdit = () => {
     setEditData({
@@ -121,8 +127,16 @@ const Profile = () => {
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 mb-6 border border-gray-200 dark:border-gray-800">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
+              {profile?.profile_picture_url ? (
+                <img
+                  src={profile.profile_picture_url}
+                  alt={profile.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-10 h-10 text-white" />
+              )}
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -143,6 +157,14 @@ const Profile = () => {
               <span>Edit Profile</span>
             </button>
           )}
+        </div>
+
+        {/* Profile Picture Upload Section */}
+        <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <ProfilePictureUpload
+            currentPictureUrl={profile?.profile_picture_url}
+            onUploadComplete={handleProfilePictureUpload}
+          />
         </div>
 
         {isEditing ? (

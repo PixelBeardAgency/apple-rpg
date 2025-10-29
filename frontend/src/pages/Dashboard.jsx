@@ -12,7 +12,8 @@ import ConfirmModal from '../components/ui/ConfirmModal';
 import XPGuideModal from '../components/modals/XPGuideModal';
 import TutorialModal from '../components/tutorial/TutorialModal';
 import LabelManager from '../components/labels/LabelManager';
-import { Plus, Check, Trash2, Calendar, X, Tag, Edit2, HelpCircle } from 'lucide-react';
+import { Calendar, X, HelpCircle } from 'lucide-react';
+import { HighPriorityIcon, MediumPriorityIcon, LowPriorityIcon, PlusIcon, CheckIcon, TrashPixelIcon, EditPixelIcon, TagPixelIcon } from '../components/icons/PixelIcons';
 import { getPriorityColor, getXPForPriority, formatDate } from '../lib/utils';
 
 const Dashboard = () => {
@@ -239,7 +240,7 @@ const Dashboard = () => {
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="flex items-center space-x-2 bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md transition"
         >
-          <Plus className="w-5 h-5" />
+          <PlusIcon className="w-5 h-5" />
           <span>Create Task</span>
         </button>
 
@@ -374,7 +375,7 @@ const Dashboard = () => {
                           : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                       }`}
                     >
-                      <Tag className="w-3.5 h-3.5" />
+                      <TagPixelIcon className="w-3.5 h-3.5" />
                       <span>{label.name}</span>
                       {selectedLabels.includes(label.id) && (
                         <X className="w-3.5 h-3.5" />
@@ -558,7 +559,7 @@ const Dashboard = () => {
                               key={label.id}
                               className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                             >
-                              <Tag className="w-3 h-3" />
+                              <TagPixelIcon className="w-3 h-3" />
                               <span>{label.name}</span>
                             </span>
                           ))}
@@ -582,14 +583,14 @@ const Dashboard = () => {
                             className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-md transition disabled:opacity-50"
                             title="Complete Task"
                           >
-                            <Check className="w-5 h-5" />
+                            <CheckIcon className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => startEditingTask(task)}
                             className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition"
                             title="Edit Task"
                           >
-                            <Edit2 className="w-5 h-5" />
+                            <EditPixelIcon className="w-5 h-5" />
                           </button>
                         </>
                       )}
@@ -599,7 +600,7 @@ const Dashboard = () => {
                         className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition disabled:opacity-50"
                         title="Delete Task"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <TrashPixelIcon className="w-5 h-5" />
                       </button>
                     </div>
                   </div>

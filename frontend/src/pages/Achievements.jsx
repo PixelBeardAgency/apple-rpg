@@ -2,7 +2,8 @@
 // Displays all 10 achievements with locked/unlocked state
 
 import { useAchievements } from '../hooks/useAchievements';
-import { Trophy, Lock, Check, Zap } from 'lucide-react';
+import { TrophyIcon, StarIcon, CrownIcon, ZapPixelIcon } from '../components/icons/PixelIcons';
+import { Lock, Check } from 'lucide-react';
 import { formatDateTime } from '../lib/utils';
 
 const Achievements = () => {
@@ -24,7 +25,7 @@ const Achievements = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-3 mb-2">
-          <Trophy className="w-8 h-8 text-yellow-500" />
+          <TrophyIcon className="w-8 h-8 text-yellow-500" />
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Achievements
           </h1>
@@ -94,7 +95,7 @@ const Achievements = () => {
                     {achievement.name}
                   </h3>
                   {achievement.earned && (
-                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    <TrophyIcon className="w-5 h-5 text-yellow-500" />
                   )}
                 </div>
                 
@@ -104,7 +105,7 @@ const Achievements = () => {
 
                 <div className="flex items-center space-x-4 text-sm">
                   <div className="flex items-center space-x-1 text-primary">
-                    <Zap className="w-4 h-4" />
+                    <ZapPixelIcon className="w-4 h-4" />
                     <span className="font-semibold">+{achievement.bonus_xp} XP</span>
                   </div>
                   

@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useProfile } from '../../hooks/useProfile';
-import { Sword, User, LogOut, Moon, Sun } from 'lucide-react';
+import { User, LogOut, Moon, Sun } from 'lucide-react';
+import { SwordPixelIcon, HomeIcon, TrophyIcon, ScrollIcon, UserPixelIcon } from '../icons/PixelIcons';
 
 const Header = () => {
   const { signOut } = useAuth();
@@ -20,7 +21,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <Sword className="w-6 h-6 text-primary" />
+            <SwordPixelIcon className="w-6 h-6 text-primary" />
             <span className="text-xl font-bold text-primary">RPG Todo</span>
           </Link>
 
@@ -71,7 +72,17 @@ const Header = () => {
               to="/profile"
               className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary transition"
             >
-              <User className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                {profile?.profile_picture_url ? (
+                  <img
+                    src={profile.profile_picture_url}
+                    alt={profile.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-white" />
+                )}
+              </div>
               <span className="hidden sm:inline">{profile?.username || 'Profile'}</span>
             </Link>
             <button
