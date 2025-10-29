@@ -1,5 +1,5 @@
 // Login Page
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Sword } from 'lucide-react';
@@ -9,8 +9,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user has visited before
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('hasVisited');
+    if (hasVisited) {
+      setIsReturningUser(true);
+    } else {
+      // First time visitor - redirect to register
+      navigate('/register', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,9 +58,16 @@ const Login = () => {
       setError(errorMessage);
       setLoading(false);
     } else {
+      // Mark that they've successfully logged in
+      localStorage.setItem('hasVisited', 'true');
       navigate('/dashboard');
     }
   };
+
+  // Don't render until we've checked returning user status
+  if (!isReturningUser) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 px-4">

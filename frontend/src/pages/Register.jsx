@@ -19,6 +19,11 @@ const Register = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
+  // Mark that user has visited the site
+  useEffect(() => {
+    localStorage.setItem('hasVisited', 'true');
+  }, []);
+
   // Debounced username check
   useEffect(() => {
     const checkUsername = async () => {
