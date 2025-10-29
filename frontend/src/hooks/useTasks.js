@@ -4,6 +4,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
+// Use relative URLs on production (Vercel), localhost for development
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 /**
  * Fetch all tasks for authenticated user
  */
@@ -49,7 +52,7 @@ export const useCreateTask = () => {
       if (!session) throw new Error('Not authenticated');
 
       // Call backend API to create task (handles achievement checking)
-      const response = await fetch('http://localhost:3000/api/tasks', {
+      const response = await fetch(`${API_URL}/api/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +130,7 @@ export const useCompleteTask = () => {
       if (!session) throw new Error('Not authenticated');
 
       // Call backend API to complete task (handles XP + achievements)
-      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/complete`, {
+      const response = await fetch(`${API_URL}/api/tasks/${taskId}/complete`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

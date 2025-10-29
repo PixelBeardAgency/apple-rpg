@@ -17,10 +17,33 @@ const Login = () => {
     setError('');
     setLoading(true);
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     const { error } = await signIn(email, password);
 
     if (error) {
-      setError(error.message);
+      // User-friendly error messages
+      let errorMessage = error.message;
+      
+      if (errorMessage.includes('Invalid login credentials') || 
+          errorMessage.includes('Invalid credentials') ||
+          errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email address before logging in. Check your inbox for the verification link.';
+      } else if (errorMessage.includes('Too many requests')) {
+        errorMessage = 'Too many login attempts. Please wait a few minutes and try again.';
+      } else if (errorMessage.includes('Network')) {
+        errorMessage = 'Unable to connect. Please check your internet connection and try again.';
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     } else {
       navigate('/dashboard');
@@ -28,15 +51,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Sword className="w-16 h-16 text-blue-400" />
+            <Sword className="w-16 h-16 text-emerald-400" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">RPG Todo</h1>
-          <p className="text-blue-200">Level up your productivity</p>
+          <p className="text-emerald-200">Level up your productivity</p>
         </div>
 
         {/* Login Form */}

@@ -4,6 +4,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
+// Use relative URLs on production (Vercel), localhost for development
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 /**
  * Fetch all labels (user's custom labels + default labels)
  */
@@ -38,7 +41,7 @@ export const useCreateLabel = () => {
       if (!session) throw new Error('Not authenticated');
 
       // Call backend API to create label (handles achievement checking)
-      const response = await fetch('http://localhost:3000/api/labels', {
+      const response = await fetch(`${API_URL}/api/labels`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -54,7 +54,7 @@ const ResetPassword = () => {
 
     // Check passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passwords do not match. Please ensure both password fields are identical.');
       setLoading(false);
       return;
     }
@@ -62,7 +62,21 @@ const ResetPassword = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password });
 
-      if (error) throw error;
+      if (error) {
+        let errorMessage = error.message;
+        
+        if (errorMessage.includes('same as the old password') || errorMessage.includes('same password')) {
+          errorMessage = 'New password must be different from your old password.';
+        } else if (errorMessage.includes('session') || errorMessage.includes('token')) {
+          errorMessage = 'Your reset link has expired. Please request a new password reset email.';
+        } else if (errorMessage.includes('Network')) {
+          errorMessage = 'Unable to connect. Please check your internet connection and try again.';
+        } else {
+          errorMessage = 'Failed to reset password. Please try again or request a new reset link.';
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       setSuccess(true);
       
@@ -77,15 +91,15 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Sword className="w-16 h-16 text-blue-400" />
+            <Sword className="w-16 h-16 text-emerald-400" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">RPG Todo</h1>
-          <p className="text-blue-200">Set your new password</p>
+          <p className="text-emerald-200">Set your new password</p>
         </div>
 
         {/* Reset Password Form */}

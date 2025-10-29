@@ -16,12 +16,39 @@ const ForgotPassword = () => {
     setError('');
     setLoading(true);
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        let errorMessage = error.message;
+        
+        if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+          errorMessage = 'Too many reset attempts. Please wait a few minutes and try again.';
+        } else if (errorMessage.includes('Network')) {
+          errorMessage = 'Unable to connect. Please check your internet connection and try again.';
+        } else if (errorMessage.includes('not found') || errorMessage.includes('User not found')) {
+          // For security, don't reveal if email exists or not
+          // Just show success message anyway
+          setSuccess(true);
+          setLoading(false);
+          return;
+        } else {
+          errorMessage = 'Failed to send reset email. Please try again or contact support if the problem persists.';
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       setSuccess(true);
     } catch (error) {
@@ -32,15 +59,15 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Sword className="w-16 h-16 text-blue-400" />
+            <Sword className="w-16 h-16 text-emerald-400" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">RPG Todo</h1>
-          <p className="text-blue-200">Reset your password</p>
+          <p className="text-emerald-200">Reset your password</p>
         </div>
 
         {/* Forgot Password Form */}
