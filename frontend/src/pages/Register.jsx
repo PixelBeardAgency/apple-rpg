@@ -39,12 +39,6 @@ const Register = () => {
       return;
     }
 
-    if (!usernameAvailable) {
-      setError('Please choose an available username');
-      setLoading(false);
-      return;
-    }
-
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
