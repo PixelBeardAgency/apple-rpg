@@ -130,7 +130,8 @@ export const useCompleteTask = () => {
       if (!session) throw new Error('Not authenticated');
 
       // Call backend API to complete task (handles XP + achievements)
-      const response = await fetch(`${API_URL}/api/tasks/${taskId}/complete`, {
+      // Use query param to indicate completion action
+      const response = await fetch(`${API_URL}/api/tasks/${taskId}?action=complete`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
