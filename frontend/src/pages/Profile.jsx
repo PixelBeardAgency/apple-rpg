@@ -170,21 +170,25 @@ const Profile = () => {
       }
 
       // Update email
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
         email: emailData.newEmail
+      }, {
+        emailRedirectTo: window.location.origin + '/profile'
       });
 
       if (updateError) throw updateError;
 
-      setEmailSuccess('Email updated successfully! Please check your new email to confirm the change.');
+      console.log('Email update response:', updateData);
+
+      setEmailSuccess('Email update initiated! Please check BOTH your old and new email addresses for a confirmation link. Your email will only change after you click the confirmation link.');
       setEmailData({ newEmail: '', password: '' });
       
-      // Hide success message and close form after 5 seconds
+      // Hide success message and close form after 8 seconds (longer message)
       setTimeout(() => {
         setEmailSuccess('');
         setIsChangingEmail(false);
         refetch(); // Refresh profile to show new email
-      }, 5000);
+      }, 8000);
     } catch (error) {
       setEmailError(error.message || 'Failed to change email');
     }
