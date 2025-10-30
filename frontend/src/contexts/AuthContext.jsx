@@ -4,6 +4,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+// Use relative URLs on production (Vercel), localhost for development
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const AuthContext = createContext({});
 
 export const useAuth = () => {
@@ -40,14 +43,35 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signUp = async (email, password, username) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username }
+    try {
+      // Call our backend API for registration (includes RPG title generation)
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, username })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return { data: null, error: { message: result.error || 'Registration failed' } };
       }
-    });
-    return { data, error };
+
+      // If registration successful, set the session
+      if (result.session) {
+        await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
+        });
+      }
+
+      return { data: result, error: null };
+    } catch (error) {
+      console.error('SignUp error:', error);
+      return { data: null, error: { message: 'Network error. Please try again.' } };
+    }
   };
 
   const signIn = async (email, password) => {
