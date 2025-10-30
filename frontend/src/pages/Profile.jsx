@@ -180,7 +180,7 @@ const Profile = () => {
 
       console.log('Email update response:', updateData);
 
-      setEmailSuccess('Email update initiated! Please check BOTH your old and new email addresses for a confirmation link. Your email will only change after you click the confirmation link.');
+      setEmailSuccess('Email update initiated! Please check BOTH your old and new email addresses for confirmation links. You must click BOTH links for the email change to take effect.');
       setEmailData({ newEmail: '', password: '' });
       
       // Hide success message and close form after 8 seconds (longer message)
