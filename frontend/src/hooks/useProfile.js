@@ -73,6 +73,7 @@ export const useProfile = () => {
 
       return {
         ...profile,
+        email: user.email, // Add email from auth user
         progress: {
           currentLevel: profile.current_level,
           totalXP: profile.total_xp,
