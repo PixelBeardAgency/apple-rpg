@@ -1,21 +1,29 @@
-# Email Update Issue - Troubleshooting Guide
+# Email Update - How It Works
 
-## ⚠️ IMPORTANT: Current Behavior
+## ✅ Expected Behavior (Security Feature)
 
 **You must click the confirmation link in BOTH emails (old and new) for the email change to take effect.**
 
-This is unusual Supabase behavior (normally only the new email link is required), but it's been confirmed through testing. The exact cause is unknown but may be related to project settings or Supabase version.
+This is **standard Supabase security behavior** to prevent unauthorized email changes:
+
+1. **Old email confirmation:** Proves the account owner approves the change
+2. **New email confirmation:** Proves the new address is valid and accessible
+
+**Why this is secure:**
+- Prevents someone who hacks your account from locking you out by changing your email
+- Prevents typos that would lock you out of your account
+- Ensures both email addresses are legitimate and accessible
 
 **Steps to change email:**
 1. Go to Profile → Change Email
 2. Enter new email + password
 3. Check your OLD email inbox → Click the confirmation link
 4. Check your NEW email inbox → Click the confirmation link
-5. Log out and log back in with your NEW email address
+5. Log out and log back in with your NEW email address ✅
 
 ---
 
-## The Problem
+## Background
 Email update shows success but:
 - No confirmation email is sent
 - Login still works with old email only
