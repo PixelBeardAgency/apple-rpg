@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { supabase } from '../lib/supabase';
-import { User, Edit2, Trophy, Zap, Lock, Sparkles } from 'lucide-react';
+import { User, Edit2, Trophy, Zap, Lock, Sparkles, Mail } from 'lucide-react';
 import ProfilePictureUpload from '../components/profile/ProfilePictureUpload';
 import { generateRPGTitle, formatRPGName } from '../utils/rpgTitles';
 
@@ -30,6 +30,15 @@ const Profile = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
+  // Email change state
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [emailData, setEmailData] = useState({
+    newEmail: '',
+    password: ''
+  });
+  const [emailError, setEmailError] = useState('');
+  const [emailSuccess, setEmailSuccess] = useState('');
+
   const handleProfilePictureUpload = () => {
     // Refetch profile to update picture everywhere
     refetch();
@@ -53,7 +62,18 @@ const Profile = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    await updateProfile.mutateAsync(editData);
+    
+    // Only send fields that have changed
+    const updates = {};
+    if (editData.username !== profile?.username) updates.username = editData.username;
+    if (editData.bio !== profile?.bio) updates.bio = editData.bio;
+    if (editData.rpg_title !== profile?.rpg_title) updates.rpg_title = editData.rpg_title;
+    
+    // Only call update if there are actual changes
+    if (Object.keys(updates).length > 0) {
+      await updateProfile.mutateAsync(updates);
+    }
+    
     setIsEditing(false);
   };
 
@@ -121,6 +141,52 @@ const Profile = () => {
       }, 3000);
     } catch (error) {
       setPasswordError(error.message || 'Failed to change password');
+    }
+  };
+
+  const handleEmailChange = async (e) => {
+    e.preventDefault();
+    setEmailError('');
+    setEmailSuccess('');
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailData.newEmail)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      // Verify password by attempting to sign in
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: emailData.password
+      });
+
+      if (signInError) {
+        setEmailError('Password is incorrect');
+        return;
+      }
+
+      // Update email
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: emailData.newEmail
+      });
+
+      if (updateError) throw updateError;
+
+      setEmailSuccess('Email updated successfully! Please check your new email to confirm the change.');
+      setEmailData({ newEmail: '', password: '' });
+      
+      // Hide success message and close form after 5 seconds
+      setTimeout(() => {
+        setEmailSuccess('');
+        setIsChangingEmail(false);
+        refetch(); // Refresh profile to show new email
+      }, 5000);
+    } catch (error) {
+      setEmailError(error.message || 'Failed to change email');
     }
   };
 
@@ -442,6 +508,106 @@ const Profile = () => {
                   setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                   setPasswordError('');
                   setPasswordSuccess('');
+                }}
+                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold py-2 px-4 rounded-md transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* Email Change Section */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+        <div className="flex items-center space-x-3 mb-4">
+          <Mail className="w-6 h-6 text-green-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Change Email</h2>
+        </div>
+
+        {!isChangingEmail ? (
+          <div>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Current email: <span className="font-semibold text-gray-900 dark:text-white">{profile?.email}</span>
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Update your email address. You'll need to verify your new email.
+            </p>
+            <button
+              onClick={() => setIsChangingEmail(true)}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition"
+            >
+              Change Email
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleEmailChange} className="space-y-4">
+            {emailError && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
+                {emailError}
+              </div>
+            )}
+
+            {emailSuccess && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-md">
+                {emailSuccess}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Current Email
+              </label>
+              <input
+                type="email"
+                value={profile?.email || ''}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                New Email
+              </label>
+              <input
+                type="email"
+                value={emailData.newEmail}
+                onChange={(e) => setEmailData({ ...emailData, newEmail: e.target.value })}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
+                placeholder="Enter new email address"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Password (for verification)
+              </label>
+              <input
+                type="password"
+                value={emailData.password}
+                onChange={(e) => setEmailData({ ...emailData, password: e.target.value })}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition"
+              >
+                Update Email
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsChangingEmail(false);
+                  setEmailData({ newEmail: '', password: '' });
+                  setEmailError('');
+                  setEmailSuccess('');
                 }}
                 className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold py-2 px-4 rounded-md transition"
               >
